@@ -1,0 +1,236 @@
+NOTA: Todas esats prácticas fueron desarrolladas con una base de datos proporcionada por Oracle.
+############################################## Unidad 1 ##############################################
+  
+--1. Obtenga una proyección de 2 columnas de la tabla del modelo HR que tiene menos filas.
+Select * from Region;
+Select region_id, region_name from Regions;
+
+--2. Escriba una consulta que muestre las columnas obligatorias de la tabla de departamentos.
+Describe Departments;
+Select Department_Id, Department_Name from Departments;
+
+--3. Escriba una consulta que muestre una proyección de aumento de un 5% del salario para los empleados que pertenecen al departamento de FINANZAS, 
+--en el resultado de la consulta muestre la identificación del empleado y el aumento salario proyectado, esta última columna nómbrela como “Aumento Salario Proyectado”.
+Select * from Departments where department_name = 'Finance';
+Select * from Employees where department_id = '100';
+Select Employee_Id, (salary * 0.05) + salary As "Aumento Salario Proyectado" from Employees
+Where department_id = '100';
+
+############################################## Unidad 2 ##############################################
+  
+--1. ¿Cuál fue el primer empleado contrato y en qué fecha?
+Select employee_id, first_name, last_name, hire_date from employees 
+order by hire_date asc;
+
+--2. Obtenga una lista con el nombre completo y el salario de todos los empleados, siempre y cuando su salario se encuentre en el rango de los 4000 a 8000 dólares.
+Select first_name, last_name, salary from Employees
+Where salary between 4000 and 8000;
+
+--3. Obtenga el id y el nombre de los empleados que no son jefes y ganan un salario superior a 5000 dólares.
+Select * from Jobs;
+Select employee_id, first_name, last_name, salary, job_id from Employees
+Where salary>5000
+and job_id NOT LIKE '%PRES%'
+and job_id NOT LIKE '%VP%'
+and job_id NOT LIKE '%MGR%'
+and job_id NOT LIKE '%MAN%'
+Order by employee_id asc;
+
+############################################## Unidad 3 ##############################################
+
+--1.Desarrolle una consulta que permita crear una cuenta de correo para cada empleado que sea jefe basado en el siguiente formato, utilice la función CONCAT. 
+/*En el resultado de la consulte muestre el id y primer nombre del empleado y su correo de acuerdo al siguiente ejemplo.
+SKing100@adpressHR.org es el ejemplo para el empleado Steven King el cual está conformado con la concatenación de los siguientes valores:
+a.      Primera letra del first_name en mayúscula.
+b.      Last_name completo.
+c.      Employee_id completo.
+d.      Símbolo Arroba
+e. Job_id completo sin guion bajo en minúscula.
+f.      El String HR.org*/
+Select * from Jobs;
+Select employee_id, first_name,
+Concat(Upper(substr(first_name,1,1)),Concat (last_name, Concat(employee_id, Concat('@',Concat(Lower(replace(job_id,'_','')), Concat('HR.', 'org')))))) as CorreoEmpleado
+From Employees
+Where 
+job_id LIKE 'AD_PRES'
+OR job_id LIKE 'AD_VP'
+OR job_id LIKE '%MGR%'
+OR job_id LIKE '%MAN%';
+
+--2.Obtenga una consulta que muestre la cantidad de años laborados por cada empleado. 
+--En el resultado de la consulta muestre el primer nombre del empleado, el año que fue contratado y la cantidad de años laborados, este último valor etiquételo como Antigüedad
+Select * from Job_History;
+Select first_name, hire_date, Round((SYSDATE - hire_date)/365) as Antigüedad from Employees;
+
+
+--3.Escriba un enunciado (requerimientos) de consulta en términos de negocio y el comando SELECT que dé respuesta a dicho enunciado, aplicando lo observado en la unidad 3 de SQL.
+/*Obtenga una consulta donde se visualice la columna del id del empleado y la columna etiquetada como "InformaciónEmplaeado" que contenga la frase "El empleado" 
+con los datos como el nombre, apellido, año de contratación, el puesto del empleado sin guiones y el salario de cada empleado, 
+además, coloque las palabras u oraciones necesarias para que la información tenga un sentido lógico, utilizando la función concat.*/
+
+Select employee_id, Concat('El empleado ', Concat(first_name, Concat(last_name, Concat(' trabaja desde ', Concat(hire_date, Concat(' con el puesto de ', 
+Concat(replace(job_id, '_', ''), Concat(' y su salario es de ', salary)))))))) as InformaciónEmplaeado from Employees;
+
+
+--Bibliografia
+--Microsoft. (2023). SUBSTRING (Transact-SQL). https://learn.microsoft.com/en-us/sql/t-sql/functions/substring-transact-sql?view=sql-server-ver16
+
+############################################## Unidad 4 ##############################################
+  
+--1. Cree una consulta que muestre el nombre del empleado y los importes de sus salarios
+con asteriscos. Cada asterisco representa mil dólares. Ordene los datos en orden
+descendente de salario. Etiquete la columna como EMPLOYEES_AND_THEIR_SALARIES*/
+
+Select Concat(first_name, Rpad('*',salary/1000,'*')) as EMPLOYEES_AND_THEIR_SALARIE
+from Employees
+order by salary desc;
+
+
+--2. Escriba una consulta que muestre el grado de todos los empleados basándose en
+el valor de la columna JOB_ID, mediante estos datos:
+Puesto Grado
+AD_PRES A
+ST_MAN B
+IT_PROG C
+SA_REP D
+ST_CLERK E
+Ninguno de las anteriores F*/
+
+Select job_id,
+Decode(job_id, 'AD_PRES', 'A',
+            'ST_MAN', 'B',
+            'IT_PROG', 'C',
+            'SA_REP', 'D',
+            'ST_CLERK', 'E',
+    'F') as Grado
+from Employees;
+
+--3. Escriba un enunciado (requerimientos) de consulta en términos de negocio y el
+comando SELECT que dé respuesta a dicho enunciado, aplicando lo observado en
+la unidad 4 de SQL.*/
+/*Obtenga una consulta de los empleados que no son jefes y que son parte de los departamentos de finance, marketing, accounting y shipping con un aumento del 5% a su salario, etiquetado como AumentoSalario.
+Los empleados que no sean parte de esos departamentos, se les debe poner un 0 en el aumento de salario.
+Se debe visualizar el id de forma descendente, el nombre y apellido del empleado mediante la funcion Concat, ademas de su puesto de trabajo y su salario
+Se debe utilizar la funcion Case para realziar el aumento de salario.*/ 
+Select * from Departments;
+Select * from Jobs;
+Select * from Employees Where department_id = '20';
+Select * from Employees Where department_id = '50';
+Select * from Employees Where department_id = '100';
+Select * from Employees Where department_id = '110';
+
+Select employee_id, Concat(first_name, Concat(' ',last_name)) as NombreEmpleado ,job_id, salary,
+Case department_id  When 20 Then ((salary * 0.05) + salary)
+                    When  50  Then ((salary * 0.05) + salary)
+                    When  100 Then ((salary * 0.05) + salary)
+                    When 110 Then ((salary * 0.05) + salary)
+                    Else 0 end AumentoSalario
+From Employees
+Where job_id NOT LIKE '%PRES%'
+and job_id NOT LIKE '%VP%'
+and job_id NOT LIKE '%MGR%'
+and job_id NOT LIKE '%MAN%'
+Order by employee_id desc;
+
+
+--Bibliografia
+--Microsoft. (2023). Función rpad. https://learn.microsoft.com/es-es/azure/databricks/sql/language-manual/functions/rpad 
+
+
+############################################## Unidad 5 ##############################################
+--1. Obtenga la cantidad de traslados por destino, en el resultado muestre el nombre del destino y la cantidad de traslados realizados.
+SELECT * FROM Destino; --> Select de Guia
+SELECT * FROM Traslado;
+
+SELECT Nombre_Destino AS Destino,
+SUM (Cantidad_Traslado) As Traslados_Totales
+FROM Destino, Traslado
+WHERE Destino.COD_Destino = Traslado.COD_Destino
+GROUP BY Nombre_Destino
+ORDER BY Traslados_Totales;
+
+--2. Obtenga en una consulta el nombre de la empresa productora y el mínimo, máximo y promedio de toxicidad producido por cada empresa.
+SELECT * FROM Empresaproductora; --> Select de Guia
+SELECT * FROM Residuo;
+
+SELECT Nombre_Empresa as Empresa,
+    MIN (toxicidad) AS Minimo,
+    MAX (toxicidad) AS Maximo,
+    AVG (toxicidad) AS Promedio
+FROM EmpresaProductora, Residuo
+WHERE Empresaproductora.NIF_Empresa = Residuo.NIF_Empresa
+GROUP BY Nombre_Empresa;
+
+--3. Escriba un enunciado y su correspondiente QUERY (SELECT) que ponga en práctica lo observado en la UNIDAD 5.
+/*Obtenga la proyeccion donde se vea la Toxicidad total de las empresas que unicamente tenga la letra "A" en el NIF_Empresa, llamelo "Contaminacion_Total" y ordenelo de forma ascendente
+ademas, ponga el nombre de la empresa y el OD_Residuo. No utilice la clausula JOIN*//
+SELECT * FROM Empresaproductora; --> Select de Guia
+SELECT * FROM Residuo;
+
+SELECT NIF_Empresa, Nombre_Empresa -->Select de Guia
+FROM Empresaproductora
+WHERE NIF_Empresa LIKE '%A-%';
+
+SELECT Nombre_Empresa, OD_Residuo,
+SUM (Toxicidad) AS Contaminacion_Total
+FROM Empresaproductora, Residuo
+WHERE Empresaproductora.NIF_Empresa LIKE '%A-%'
+AND Empresaproductora.NIF_Empresa = Residuo.NIF_Empresa 
+GROUP BY Nombre_Empresa, OD_Residuo
+ORDER BY Contaminacion_Total ASC;
+
+/* Bibliografia
+Cedano. A. (2017). Unir tablas con JOIN o con WHERE en SQL ¿cuál es más eficaz? [duplicada]. https://es.stackoverflow.com/questions/74498/unir-tablas-con-join-o-con-where-en-sql-cu%C3%A1l-es-m%C3%A1s-eficaz */
+
+############################################## Unidad 6 ##############################################
+--1. Escriba un enunciado y su correspondiente QUERY (SELECT) que ponga en práctica lo observado en la UNIDAD 6.
+/*Obtenga una proyeccion del Nombre_Empresa, Ciudad_Destino, Fecha_envio, Fecha_llegada y cree un campo llamado "Efectividad" de las tablas EmpresaProductora, Destino y Traslado, utilizando la clausula JOIN.
+Ademas, ordene las Fechas_envio de menor a mayor. Utilice la operacion de resta entre ambas fechas (Envio y Entrega) y las que tenga mas de 1 dia de diferencia, ponga un "0" en la columna "Efectividad"
+Coloque nombres apropiados a las columnas de la consulta.*/
+
+SELECT * FROM Empresaproductora; --> Select de Guia
+SELECT * FROM Traslado;
+SELECT * FROM Destino;
+
+SELECT Nombre_Empresa as EMPRESA, 
+       Ciudad_Destino AS DESTINO, 
+       Fecha_Envio AS ENVIO, 
+       Fecha_Llegada AS LLEGADA,
+Case 
+    When Fecha_Llegada - Fecha_Envio > 1 THEN 0 
+    Else 1 end Efectividad
+FROM Empresaproductora
+JOIN Traslado ON Empresaproductora.NIF_Empresa = Traslado.NIF_Empresa
+JOIN Destino ON Traslado.COD_Destino = Destino.COD_Destino
+ORDER BY Fecha_Envio;
+
+--2. Obtenga una consulta que muestre el nombre de la empresa productora de residuo y la suma total de la cantidad de residuo que produce, ordene la consulta de manera descendente por la suma total.
+SELECT * FROM Empresaproductora; --> Select de Guia
+SELECT * FROM Residuo;
+
+SELECT Nombre_Empresa as Empresa,
+SUM(Cantidad_Residuo) AS Residuos
+FROM Empresaproductora
+JOIN Residuo ON Empresaproductora.NIF_Empresa = Residuo.NIF_Empresa
+GROUP BY Nombre_Empresa
+ORDER BY Residuos DESC;
+
+--3. Obtenga una proyección de 6 columnas que recorra mediante JOIN 3 tablas del modelo de RESIDUOS.
+SELECT * FROM Empresaproductora; --> Select de Guia
+SELECT * FROM Residuo;
+SELECT * FROM Residuo_Constituyente;
+
+SELECT 
+    Empresaproductora.NIF_Empresa, 
+    Empresaproductora.Nombre_Empresa, 
+    Residuo.Toxicidad, 
+    Residuo.Cantidad_Residuo, 
+    Residuo_Constituyente.COD_Constituyente, 
+    Residuo_Constituyente.Cantidad
+FROM Empresaproductora
+JOIN Residuo ON Empresaproductora.NIF_Empresa = Residuo.NIF_Empresa 
+JOIN Residuo_Constituyente ON Residuo.COD_Residuo = Residuo_Constituyente.COD_Residuo
+ORDER BY Toxicidad ASC; 
+
+/* Bibliografia
+WChiquito. (2013). Resolución de ambigüedad al usar términos homónimos en SQL. https://entredesarrolladores.com/1683/resoluci%C3%B3n-de-ambig%C3%BCedad-al-usar-t%C3%A9rminos-hom%C3%B3nimos-en-sql */
