@@ -3,10 +3,7 @@ Este repositorio contiene una colección de proyectos desarrollados con distinto
 
 🗂 Tecnologías incluidas
 🟠 Oracle SQL
-
 🔵 Microsoft SQL Server
-
 🟡 MySQL
-
 🟢 MongoDB
 
